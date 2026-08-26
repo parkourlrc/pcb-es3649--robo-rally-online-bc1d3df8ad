@@ -3,8 +3,6 @@ import type { PlayerID } from "../../shared/models/player"
 import { DualKeyMap, MovementForest } from "./graph"
 import { applyOrientationStep, MovementArrayWithResults, MovementFrame, MovementMapBuilder, MovementStatus, Turn, type BoardPosition, type MovementResult, type OrientedPosition } from "./move_processors"
 
-const BOARD_SIZE = 12
-
 /**
  * The different types of spaces on a board
  */
@@ -268,15 +266,34 @@ export type BoardData = {
  * @param obj any old object, but probably one parsed from JSON
  */
 export function isValidBoardData(obj:any): obj is BoardData {
-    if (obj === undefined ||
-        obj.spaces === undefined ||
-        obj.walls === undefined ||
-        obj.x_dim === undefined ||
-        obj.y_dim === undefined ||
-        obj.display_name === undefined
-    ) {
-        // the top level format is bad
-        console.warn(`Missing properties for ${obj.display_name}`)
+    if (obj === undefined) {
+        console.warn("Board is undefined")
+        return false
+    }
+
+    let missing_any = false
+    if (obj.spaces === undefined) {
+        console.warn("Property spaces is undefined")
+        missing_any = true
+    }
+    if (obj.walls === undefined) {
+        console.warn("Property walls is undefined")
+        missing_any = true
+    }
+    if (obj.x_dim === undefined) {
+        console.warn("Property x_dim is undefined")
+        missing_any = true
+    }
+    if (obj.y_dim === undefined) {
+        console.warn("Property y_dim is undefined")
+        missing_any = true
+    }
+    if (obj.display_name === undefined) {
+        console.warn("Property display_name is undefined")
+        missing_any = true
+    }
+
+    if (missing_any) {
         return false
     }
 
@@ -307,21 +324,24 @@ export function isValidBoardData(obj:any): obj is BoardData {
     // check lengths of the elements
     try {
         // proper array checks are a pain, just try iterating over spaces
-        for (const col of obj.spaces) {
+        for (const col_idx in obj.spaces) {
+            const col = obj.spaces[col_idx]
             if (col === undefined || col.length !== obj.y_dim) {
-                console.warn('Spaces column of incorrect length')
+                console.warn(`Spaces column ${col_idx} incorrect length`)
                 return false
             }
         }
-        for (const col of obj.walls.horizontal_walls) {
+        for (const col_idx in obj.walls.horizontal_walls) {
+            const col = obj.walls.horizontal_walls[col_idx]
             if (col === undefined || col.length !== obj.y_dim + 1) {
-                console.warn('Horizontal walls column of incorrect length')
+                console.warn(`Horizontal walls column ${col_idx} has incorrect length`)
                 return false
             }
         }
-        for (const col of obj.walls.vertical_walls) {
+        for (const col_idx in obj.walls.vertical_walls) {
+            const col = obj.walls.vertical_walls[col_idx]
             if (col === undefined || col.length !== obj.y_dim) {
-                console.warn('Vertical walls column of incorrect length')
+                console.warn(`Vertical walls column ${col_idx} has incorrect length`)
                 return false
             }
         }
@@ -361,7 +381,7 @@ export type Evaluator = (position: OrientedPosition, movement: MovementFrame) =>
 export class Board {
     private static board_count = 0
     private readonly id: number
-    public data: BoardData
+    public readonly data: BoardData
 
     // all other events are independent, and only the position matters
     public checkpoint_map: DualKeyMap<number, number> = new DualKeyMap<number, number>()
@@ -513,10 +533,11 @@ export class Board {
             return
         }
         const destination_pos = applyOrientationStep(pos, o)
+        if (!this.onBoard(destination_pos)) {
+            return
+        }
         const destination_space = this.data.spaces[destination_pos.x][destination_pos.y]
-        if (!this.onBoard(destination_pos) ||
-            !SpaceType.isAnyConveyor(destination_space.type))
-        {
+        if (!SpaceType.isAnyConveyor(destination_space.type)) {
             return
         }
 
@@ -989,7 +1010,7 @@ export function getWalls(board: Board|BoardData, pos: BoardPosition): SpaceBound
     }
     const x = pos.x
     const y = pos.y
-    if (x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE) {
+    if (x < 0 || y < 0 || x >= data.x_dim || y >= data.y_dim) {
         console.error(`Given pair (${x}, ${y}) is out of bounds`)
         throw ("Out of Bounds")
     }

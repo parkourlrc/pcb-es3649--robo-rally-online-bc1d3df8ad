@@ -22,7 +22,7 @@ export async function loadFromJson(name:string): Promise<BoardData> {
         return raw
     }
 
-    throw new Error("File does not include valid board data")
+    throw new Error(`[BoardLoader]: File '${name}' does not include valid board data`)
 }
 
 /**
@@ -31,12 +31,12 @@ export async function loadFromJson(name:string): Promise<BoardData> {
  * @returns board data loaded from a serial port
  */
 export async function loadFromSerial(): Promise<BoardData> {
-    throw new Error("Not Implemented")
+    throw new Error("[BoardLader]: Serial loading is not Implemented")
 }
 
 /**
  * gets the list of boards from the assets folder, filters out any test boards, then returns
- * the others
+ * the others. "Test" boards are those with filenames beginning with `test.`
  * @returns the list of boards which are available to load
  */
 export function listBoards(): string[] {

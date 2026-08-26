@@ -4,22 +4,26 @@
   "required": ["walls", "spaces", "x_dim", "y_dim", "display_name"],
   "properties": {
     "display_name": {
-      "type": "string"
+      "type": "string",
+      "description": "the name of this board as it will be shown in game (post-loading)"
     },
     "walls": {
       "type": "object",
+      "description": "a pair of arrays specifying where walls are positioned on the board",
       "required": ["horizontal_walls", "vertical_walls"],
       "properties": {
         "horizontal_walls": {
           "type": "array",
-          "maxItems": 12,
+          "description": "Walls which run horizontally (prohibit vertical movement). They are indexed first from left to right, then from bottom to top",
+          "maxItems": 15,
           "items": {
             "type": "array",
-            "maxItems": 13,
+            "maxItems": 16,
             "items": {
               "type": ["object", "null"],
               "properties": {
                 "hi": {
+                  "description": "the object present on the north side of the wall",
                   "oneOf": [
                     {
                       "type": "string",
@@ -30,6 +34,7 @@
                       "properties": {
                         "registers": {
                           "type": "array",
+                          "description": "the registers on which the push panel activated",
                           "items": {
                             "type": "integer"
                           }
@@ -39,6 +44,7 @@
                   ]
                 },
                 "lo": {
+                  "description": "the object present on the south side of the wall",
                   "oneOf": [
                     {
                       "type": "string",
@@ -49,6 +55,7 @@
                       "properties": {
                         "registers": {
                           "type": "array",
+                          "description": "the registers on which the push panel activated",
                           "items": {
                             "type": "integer"
                           }
@@ -63,14 +70,16 @@
         },
         "vertical_walls": {
           "type": "array",
-          "maxItems": 13,
+          "description": "Walls which run vertically (prohibit horizontal movement). They are indexed first from left to right, then from bottom to top",
+          "maxItems": 16,
           "items": {
             "type": "array",
-            "maxItems": 12,
+            "maxItems": 15,
             "items": {
               "type": ["object", "null"],
               "properties": {
                 "hi": {
+                  "description": "the object present on the east side of the wall",
                   "oneOf": [
                     {
                       "type": "string",
@@ -81,6 +90,7 @@
                       "properties": {
                         "registers": {
                           "type": "array",
+                          "description": "the registers on which the push panel activated",
                           "items": {
                             "type": "integer"
                           }
@@ -90,6 +100,7 @@
                   ]
                 },
                 "lo": {
+                  "description": "the object present on the west side of the wall",
                   "oneOf": [
                     {
                       "type": "string",
@@ -100,6 +111,7 @@
                       "properties": {
                         "registers": {
                           "type": "array",
+                          "description": "the registers on which the push panel activated",
                           "items": {
                             "type": "integer"
                           }
@@ -116,16 +128,19 @@
     },
     "spaces": {
       "type": "array",
-      "maxItems": 12,
+      "description": "The array of board spaces. It is indexed first from left to right, then from bottom to top",
+      "maxItems": 15,
       "minItems": 3,
       "items": {
         "type": "array",
-        "maxItems": 12,
+        "maxItems": 15,
         "minItems": 3,
         "items": {
           "type": "object",
+          "description": "the properties properties of the space",
           "properties": {
             "type": {
+              "description": "the type of space this is: conveyor, battery, pit, spawn etc.",
               "oneOf": [
                 {
                   "type": "string",
@@ -135,20 +150,23 @@
                   "required": ["id"],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "the UUID of this spawn point"
                     }
                   }
                 }
               ]
             },
             "cover": {
+              "description": "the type of cover this space has: checkpoint, scrambler, crusher, etc.",
               "oneOf": [
                 {
                   "type": "object",
                   "required": ["number"],
                   "properties": {
                     "number": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "the number of this checkpoint"
                     }
                   }
                 },{
@@ -158,7 +176,8 @@
                     "registers": {
                       "type": "array",
                       "items": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "the registers on which this crusher activates"
                       }
                     }
                   }
@@ -167,21 +186,25 @@
                   "required": ["id"],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "the UUID of this respawn point"
                     }
                   }
                 },{
                   "type": "string",
+                  "description": "which basic cover this is: scrambler",
                   "enum": ["scrambler"]
                 }
               ]
             },
             "orientation": {
               "type": "string",
+              "description": "The orientation of this space. This is important for spawn points and conveyors",
               "enum": ["N", "S", "E", "W"]
             },
             "cover_orientation": {
               "type": "string",
+              "description": "The orientation of this spaces's cover. This is important for respawn points",
               "enum": ["N", "S", "E", "W"]
             }
           }
@@ -189,10 +212,12 @@
       }
     },
     "x_dim": {
-      "type": "integer"
+      "type": "integer",
+      "description": "the number of spaces in the x dimension, which must coincide with the number of rows in the #spaces key."
     },
     "y_dim": {
-      "type": "integer"
+      "type": "integer",
+      "description": "the number of spaces in the y dimension, which must coincide with the length of a #spaces key entry."
     }
   }
 }
