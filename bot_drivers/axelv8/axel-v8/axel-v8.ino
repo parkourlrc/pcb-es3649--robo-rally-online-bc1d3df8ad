@@ -2,23 +2,31 @@
 #include <SPI.h> // builtin
 #include <MFRC522.h> // https://github.com/miguelbalboa/rfid
 
-#define DEBUG true
+#define DEBUG 0
 
 #define BOT_NAME "Axel-V8"
-#define STEPS_TO_MOVE_ONE_SPACE 100
-#define STEPS_TO_ROTATE 100
 
+#define STEPS_TO_MOVE_ONE_SPACE 100 // the number of motor steps needed to move one square
+#define STEPS_TO_ROTATE 100 // the number of motor steps are required to rotate 90 degrees
+#define ONE_MOVE_LENGTH 2 // the time we want it to take to execute one movement
+// trigonometric scalars for the above constants assuming a 0-, 120-, and 240-degree kiwi drive configuration of motors
+const double ANGLED_MOTOR_FORWARD_MVMT_SCALAR = 2/sqrt(2);
+const double ANGLED_MOTOR_LATERAL_MVMT_SCALAR = 2;
+
+// Pin numbers for the devices
 #define STATUS_LED_PIN A3
 #define RFID_RST_PIN A7
 // #define SD_CS_PIN 10
 #define DAC_CS_PIN 9
-#define LASER_PIN 8
-#define RFID_CS_PIN 7 
-#define MTR_CLK_PIN 6
+#define LASER_PIN A2
+#define RFID_CS_PIN 8
+#define F_MTR_CLK_PIN 10
+#define LR_MTR_CLK_PIN 6
 #define MTR_ENABLE_PIN 5
 #define MTR_RESET_PIN 4
-#define MTRL_ORIENTATION_PIN 2
-#define MTRR_ORIENTATION_PIN 3
+#define MTRF_ORIENTATION_PIN 9
+#define MTRL_ORIENTATION_PIN 3
+#define MTRR_ORIENTATION_PIN 7
 
 /**
  * States have the following LED status descriptions
@@ -50,7 +58,8 @@ namespace Movement {
 };
 
 uint8_t movement = Movement::NONE;
-int steps;
+int angle_motor_steps;
+int straight_motor_steps;
 
 /******************************* BLUETOOTH SETUP *******************************/
 // define the UUIDs for our characteristics
@@ -83,7 +92,7 @@ void connect() {
 
   BLE.stopAdvertise();
 
-  #ifdef DEBUG
+  #if DEBUG
     Serial.println("Connected to central device!");
     Serial.print("MAC Address: ");
     Serial.println(central.address());
@@ -106,7 +115,7 @@ void updateBLEValues() {
       move();
     }
 
-    #ifdef DEBUG
+    #if DEBUG
       Serial.print("Read state: ");
       Serial.println(cur_state);
       Serial.print("Read movement: ");
@@ -138,7 +147,7 @@ void readRFID() {
       rfid.uid.uidByte[1] != nuid_PICC[1] || 
       rfid.uid.uidByte[2] != nuid_PICC[2] || 
       rfid.uid.uidByte[3] != nuid_PICC[3] ) {
-    #ifdef DEBUG
+    #if DEBUG
       Serial.print("Detected new card. NUID tag is: ");
       Serial.println();
     #endif
@@ -176,27 +185,56 @@ inline void setMotorWiddershins(const uint8_t& controller_pin) {
   digitalWrite(controller_pin, LOW);
 }
 
+/**
+ * @brief set the motor orientations and execute
+ * 
+ * Based on the movement direction, set the correct values on the orientation pins for each motor.
+ * Since we have switched to a Kiwi drive setup, we basically switch the movements, and set the
+ * orientation values all at once. We also set the steps to take, which is adjusted for the angled
+ * motors so that the velocity component is equal to a single movement unit
+ */
 void move() {
-  if (movement == Movement::MOVE_FORWARD || movement == Movement::TURN_RIGHT) {
-    // left motor needs to move clockwise
-    setMotorClockwise(MTRL_ORIENTATION_PIN);
-  } else {
-    // needs to move widdershins
-    setMotorWiddershins(MTRL_ORIENTATION_PIN);
-  }
-
-  if (movement == Movement::MOVE_BACK || movement == Movement::TURN_RIGHT) {
-    // right motor needs to move clockwise
-    setMotorClockwise(MTRR_ORIENTATION_PIN);
-  } else {
-    // right motor needs to move widdershins
-    setMotorWiddershins(MTRR_ORIENTATION_PIN);
-  }
-
-  if (movement == Movement::MOVE_FORWARD || movement == Movement::MOVE_BACK) {
-    steps = STEPS_TO_MOVE_ONE_SPACE;
-  } else {
-    steps = STEPS_TO_ROTATE;
+  switch (movement) {
+    case Movement::MOVE_FORWARD:
+      setMotorClockwise(MTRL_ORIENTATION_PIN);
+      setMotorWiddershins(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_MOVE_ONE_SPACE * ANGLED_MOTOR_FORWARD_MVMT_SCALAR;
+      break;
+    case Movement::MOVE_BACK:
+      setMotorClockwise(MTRL_ORIENTATION_PIN);
+      setMotorWiddershins(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_MOVE_ONE_SPACE * ANGLED_MOTOR_FORWARD_MVMT_SCALAR;
+      break;
+    case Movement::MOVE_LEFT:
+      setMotorClockwise(MTRF_ORIENTATION_PIN);
+      setMotorWiddershins(MTRL_ORIENTATION_PIN);
+      setMotorWiddershins(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_MOVE_ONE_SPACE * ANGLED_MOTOR_LATERAL_MVMT_SCALAR;
+      straight_motor_steps = STEPS_TO_MOVE_ONE_SPACE;
+      break;
+    case Movement::MOVE_RIGHT:
+      setMotorWiddershins(MTRF_ORIENTATION_PIN);
+      setMotorClockwise(MTRL_ORIENTATION_PIN);
+      setMotorClockwise(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_MOVE_ONE_SPACE * ANGLED_MOTOR_LATERAL_MVMT_SCALAR;
+      straight_motor_steps = STEPS_TO_MOVE_ONE_SPACE;
+      break;
+    case Movement::TURN_LEFT:
+      setMotorWiddershins(MTRF_ORIENTATION_PIN);
+      setMotorWiddershins(MTRL_ORIENTATION_PIN);
+      setMotorWiddershins(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_ROTATE;
+      straight_motor_steps = STEPS_TO_ROTATE;
+      break;
+    case Movement::TURN_RIGHT:
+      setMotorClockwise(MTRF_ORIENTATION_PIN);
+      setMotorClockwise(MTRL_ORIENTATION_PIN);
+      setMotorClockwise(MTRR_ORIENTATION_PIN);
+      angle_motor_steps = STEPS_TO_ROTATE;
+      straight_motor_steps = STEPS_TO_ROTATE;
+      break;
+    default:
+      break;
   }
 
   // enable the motors
@@ -208,9 +246,9 @@ void moveStep() {
   static int steps_taken = 0;
 
   // begin rotating the motors
-  if (steps_taken < steps) {
-    PinStatus clk_state = digitalRead(MTR_CLK_PIN);
-    digitalWrite(MTR_CLK_PIN, !clk_state);
+  if (steps_taken < straight_motor_steps) {
+    PinStatus clk_state = digitalRead(F_MTR_CLK_PIN);
+    digitalWrite(F_MTR_CLK_PIN, !clk_state);
     delayMicroseconds(MOTOR_STEP_DELAY_US);
     if (clk_state == LOW) {
       steps_taken++;
@@ -221,7 +259,7 @@ void moveStep() {
     // set that there's no movement
     movement = Movement::NONE;
     // reset the step counts
-    steps = 0;
+    straight_motor_steps = 0;
     steps_taken = 0;
   }
 }
@@ -235,7 +273,7 @@ void errorState() {
   while (1) {
     digitalWrite(STATUS_LED_PIN, HIGH);
     delay(2000);
-    digitalWrite(STATUS_LED_PIN, HIGH);
+    digitalWrite(STATUS_LED_PIN, LOW);
     delay(2000);
   }
 }
@@ -257,7 +295,7 @@ void shutdown() {
   }
 
   // sometimes we still need to move while shutdown
-  if (steps) {
+  if (straight_motor_steps) {
     moveStep();
   }
 }
@@ -320,7 +358,8 @@ void setup() {
   pinMode(RFID_RST_PIN, OUTPUT);
   pinMode(LASER_PIN, OUTPUT);
   pinMode(RFID_CS_PIN, OUTPUT);
-  pinMode(MTR_CLK_PIN, OUTPUT);
+  pinMode(LR_MTR_CLK_PIN, OUTPUT);
+  pinMode(F_MTR_CLK_PIN, OUTPUT);
   pinMode(MTR_RESET_PIN, OUTPUT);
   digitalWrite(MTR_RESET_PIN, HIGH);
   pinMode(MTR_ENABLE_PIN, OUTPUT);
@@ -331,7 +370,7 @@ void setup() {
   digitalWrite(STATUS_LED_PIN, HIGH);
   
   
-  #ifdef DEBUG
+  #if DEBUG
     Serial.begin(9600);
     while (!Serial) {}
     Serial.println("Resetting L6208(s)");
@@ -342,7 +381,7 @@ void setup() {
   delayMicroseconds(15);
   digitalWrite(MTR_RESET_PIN, HIGH);
 
-  #ifdef DEBUG
+  #if DEBUG
     Serial.println("L6208(s) reset");
     Serial.println("Initializing RFID reader");
   #endif
@@ -350,28 +389,32 @@ void setup() {
   SPI.begin();
   rfid.PCD_Init();
 
-  #ifdef DEBUG
+  #if DEBUG
     Serial.println("RFID reader ready");
     Serial.println("Starting Bluetooth® Low Energy");
   #endif
 
   if(!BLE.begin()) {
-  #ifdef DEBUG
+  #if DEBUG
       Serial.println("Failed to start Bluetooth®!");
   #endif
     errorState();
   }
 
-  BLE.setLocalName(BOT_NAME);
-  BLE.setAdvertisedService(controlService);
+  // set up the service
   controlService.addCharacteristic(stateCharacteristic);
   controlService.addCharacteristic(soundCharacteristic);
   controlService.addCharacteristic(movementDirectionCharacteristic);
   controlService.addCharacteristic(idempotencyCharacteristic);
   controlService.addCharacteristic(rfidCharacteristic);
+  // publish these attributes and configure the BLE identity
+  BLE.setLocalName(BOT_NAME);
+  BLE.addService(controlService);
+  BLE.setAdvertisedService(controlService);
 
   stateCharacteristic.writeValue(-1);
-  #ifdef DEBUG
+  rfidCharacteristic.writeValue(0);
+  #if DEBUG
     Serial.println("Bluetooth® Low Energy initialized");
   #endif
 
