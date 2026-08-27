@@ -666,6 +666,14 @@
       "version": 1
     },
     "net_format_name": "",
+    "ngspice": {
+      "fix_include_paths": true,
+      "meta": {
+        "version": 0
+      },
+      "model_mode": 4,
+      "workbook_filename": ""
+    },
     "page_layout_descr_file": "",
     "plot_directory": "",
     "spice_current_sheet_as_root": false,
@@ -693,6 +701,10 @@
     [
       "2ddc1f80-d0ed-4ab2-8bb3-bf8e03325d1b",
       "Motor Driver2"
+    ],
+    [
+      "cdcde821-42ca-45a1-a080-72aa69a37458",
+      "DFPlayer"
     ]
   ],
   "text_variables": {}
