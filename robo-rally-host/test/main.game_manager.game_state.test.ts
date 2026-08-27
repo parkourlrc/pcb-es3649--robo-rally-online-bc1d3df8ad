@@ -26,6 +26,12 @@ const notifier: Notifier = {
     },
     beginActivation() {
         return
+    },
+    updateRegister(register) {
+        return
+    },
+    updateBoardElement(element) {
+        return
     }
 } 
 
@@ -75,7 +81,13 @@ test('GameStateManager.setProgram (Movements, again, pushing, pits, initial shut
             ret.set('ford1234', {x:0, y:0, orientation: Orientation.E})
         
             return ret
-        }
+        },
+        async setup() {
+            
+        },
+        async finished() {
+            
+        },
     }
 
     player_initializer.addPlayer('Chris', 'hems1234')
@@ -96,8 +108,7 @@ test('GameStateManager.setProgram (Movements, again, pushing, pits, initial shut
     const gm = new GameStateManager(
         player_initializer,
         bot_initializer,
-        mock_executor,
-        notifier
+        mock_executor
     )
 
     // set some programs on here
@@ -407,7 +418,9 @@ test('GameState.setProgram (Movements, gears, conveyor1s, Haywire, haywire-again
             ret.set('ford1234', {x:5, y:2, orientation: Orientation.E})
         
             return ret
-        }
+        },
+        async setup() {},
+        async finished() {}
     }
 
     player_initializer.addPlayer('Chris', 'hems1234')
@@ -428,8 +441,7 @@ test('GameState.setProgram (Movements, gears, conveyor1s, Haywire, haywire-again
     const gm = new GameStateManager(
         player_initializer,
         bot_initializer,
-        mock_executor,
-        notifier
+        mock_executor
     )
 
     // set some programs on here
