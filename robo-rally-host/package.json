@@ -13,6 +13,22 @@
     "test": "jest --silent",
     "test-loud": "jest"
   },
+  "dependencies": {
+    "@stoprocent/noble": "^2.8.0",
+    "cors": "^2.8.5",
+    "dbus-next": "^0.10.2",
+    "dotenv": "^16.4.5",
+    "electron-squirrel-startup": "^1.0.1",
+    "express": "^4.19.2",
+    "http-status-codes": "^2.3.0",
+    "nayuki-qr-code-generator": "^1.8.0",
+    "pinia": "^2.2.1",
+    "rpmbuild": "^0.0.23",
+    "socket.io": "^4.7.5",
+    "uuid": "^11.0.5",
+    "vue": "^3.4.33",
+    "vue-router": "^4.4.0"
+  },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
     "@electron-forge/maker-deb": "^7.4.0",
@@ -30,7 +46,7 @@
     "@typescript-eslint/parser": "^5.62.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.5.1",
-    "electron": "31.2.0",
+    "electron": "^43.4.1",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "jest": "^29.7.0",
@@ -44,20 +60,5 @@
     "name": "Eric Steadman",
     "email": "es3649@gmail.com"
   },
-  "license": "MIT",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "electron-squirrel-startup": "^1.0.1",
-    "express": "^4.19.2",
-    "http-status-codes": "^2.3.0",
-    "nayuki-qr-code-generator": "^1.8.0",
-    "node-ble": "^1.13.0",
-    "pinia": "^2.2.1",
-    "rpmbuild": "^0.0.23",
-    "socket.io": "^4.7.5",
-    "uuid": "^11.0.5",
-    "vue": "^3.4.33",
-    "vue-router": "^4.4.0"
-  }
+  "license": "MIT"
 }

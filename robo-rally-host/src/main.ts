@@ -13,7 +13,7 @@ import { GameStateManager } from './main/game_manager/game_state';
 import { GameInitializer, type BotInitializer } from './main/game_manager/initializers';
 import type { PlayerID, Player, CharacterID } from './shared/models/player';
 import { GamePhase, newRegisterArray } from './shared/models/game_data';
-import { BOTS, BOTS_MAP } from './shared/data/robots';
+import { BOTS_MAP } from './shared/data/robots';
 import { ServerNotifier, RenderNotifier } from './main/notifiers'
 
 // TODO we might consider moving this functionality to a separate class
@@ -413,7 +413,7 @@ child.on('message', (message: Server2MainMessage) => {
                     }
                 }
                 const catch_func = (reason: any) => {
-                    console.error("Error while estabishing bluetooth connection", reason)
+                    console.error("Error while establishing bluetooth connection", reason)
                 }
                 if (!bm.isDiscovering()) {
                     bm.startDiscovering().then((_) => {

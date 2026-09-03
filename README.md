@@ -6,6 +6,10 @@ One day, while playing RoboRally, I thought to myself, _"How cool would it be if
 I started with a high-school physics knowledge of electronics, then read forums, watched videos, and bothered friends until I was able to figure out how to make it work.
 This repository contains a majority of the files and code needed to bring the project to life.
 
+This project has also been done mostly by hand, i.e.: without the help of Copilot.
+This is a passion project for me, so it's of more value to me to learn the principles that make the project function, and understand the mechanics than to get it finished.
+I've become a good deal better at RoboRally since implementing the game engine.
+
 **Disclaimer**: This project is not affiliated with nor endorsed by Richard Garfield nor Renegade Game Studio
 
 ## Contents
@@ -35,7 +39,7 @@ The project is broken into 4 main parts:
 
 ### Player Client
 
-The Player Client, contained in the `player-client` directory, is a Vue+Vite+Pinia web application which provides a web interface for playing the game
+The Player Client, contained in the `player-client` directory, is a Vue+Vite+Pinia web application written in Typescript which provides a web interface for the players.
 
 ### Host Application
 
@@ -45,7 +49,7 @@ This server serves the Player Client.
 
 ### Bot Drivers
 
-The bot drivers, in the `bot-drivers` directory, are a series of Arduino programs, designed to control robots over a Bluetooth connection managed by the host.
+The bot drivers, in the `bot-drivers` directory, are a series of Arduino programs, designed to control robots over a Bluetooth connection managed by the host device.
 
 ### Schematics
 
