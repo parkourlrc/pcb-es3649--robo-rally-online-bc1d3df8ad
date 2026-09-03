@@ -86,16 +86,20 @@ openLobby()
         
         <div>
             <table class="block">
-                <tr>
-                    <th class="table-column-50">Player</th>
-                    <th class="table-column-50">Character</th>
-                    <th class="table-column-50"></th>
-                </tr>
-                <tr v-for="[player_id, name] of r_gds.players" :key="player_id">
-                    <td>{{ name }}</td>
-                    <td>{{ r_gds.characters.has(player_id) ? r_gds.characters.get(player_id)?.name : "[No character selected]" }}</td>
-                    <td><button class="cancel" @click="removePlayer(player_id)">X</button></td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th class="table-column-50">Player</th>
+                        <th class="table-column-50">Character</th>
+                        <th class="table-column-50"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="[player_id, name] of r_gds.players" :key="player_id">
+                        <td>{{ name }}</td>
+                        <td>{{ r_gds.characters.has(player_id) ? r_gds.characters.get(player_id)?.name : "[No character selected]" }}</td>
+                        <td><button class="cancel" @click="removePlayer(player_id)">X</button></td>
+                    </tr>
+                </tbody>
             </table>
 
             <div v-if="r_gds.to_dos.size > 0" class="text-smaller">
