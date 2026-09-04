@@ -7,13 +7,17 @@ Setting up this project is super non-trivial
 ### Bluetooth
 
 This project depends on the BlueZ package, which is the official Bluetooth driver for Linux development stacks.
-It requires root privileges by default, so you will either need to run as root (rarely recommended), or else grant your user access to BlueZ by adding the following to `/etc/dbus-1/system.d/node-ble.conf`
+It requires the following libraries to be installed
+```bash
+sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+```
+It also requires root privileges by default, so you will either need to run as root (rarely recommended), or else grant your user access to BlueZ by adding the following to `/etc/dbus-1/system.d/bluetooth.conf`.
 
 ```xml
 <!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
   "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 <busconfig>
-  <policy user="__USERID__">
+  <policy group="bluetooth">
    <allow own="org.bluez"/>
     <allow send_destination="org.bluez"/>
     <allow send_interface="org.bluez.GattCharacteristic1"/>
@@ -24,7 +28,11 @@ It requires root privileges by default, so you will either need to run as root (
 </busconfig>
 ```
 
-where `__USERID__` is replaces with the ID of the user which will be running the electron app.
+This will allow members of the `bluetooth` group access to the bluetooth drivers.
+Add the current user to the `bluetooth` group with 
+```bash
+sudo usermod -a -G bluetooth $USER
+```
 
 ### Port Access
 

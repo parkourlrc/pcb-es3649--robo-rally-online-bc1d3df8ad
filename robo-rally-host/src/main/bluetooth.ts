@@ -1,4 +1,5 @@
 // import { createBluetooth, type Adapter, type Device, type GattService } from "node-ble";
+import { platform } from 'node:os'
 import { Characteristic, Peripheral, Service, withBindings } from "@stoprocent/noble"
 import type { Character, CharacterID, Player, PlayerID } from "../shared/models/player"
 import { ActionFrame, BotMovement, BotState } from "./game_manager/executor";
@@ -8,8 +9,10 @@ import type { BotInitializer } from "./game_manager/initializers";
 import { Board } from "./game_manager/board";
 import { DualKeyMap } from "./game_manager/graph";
 
-// auto-select bluetooth bindings based on platform
-const noble = withBindings('default')
+// auto-select bluetooth bindings based on platform, specifying dbus for linux
+const noble = platform() == 'darwin' ? withBindings('mac') : withBindings('dbus', {
+    adapterID: 'hci0'
+})
 
 /** a timeout value (ms) */
 const TIMEOUT = 15000
@@ -182,7 +185,7 @@ export class BluetoothManager implements MovementExecutor {
             }
 
             // check that the correct characteristics are present
-            const characteristic_IDs = (await services[0].discoverCharacteristicsAsync()).map((char) => char.uuid)
+            const characteristic_IDs = (await services[0].discoverCharacteristicsAsync()).map((char: Characteristic) => char.uuid)
             for (const characteristic of ALL_CHARACTERISTICS) {
                 // track missing so we get a full listing of missing characteristics
                 // It will make debugging nicer
