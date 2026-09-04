@@ -8,6 +8,9 @@ import { useGameDataStore } from '../stores/render_game_data_store';
 
 const r_gds = useGameDataStore()
 
+// call this on load/setup to get the starting information
+r_gds.getBotConnectionStatuses()
+
 const refresher = setInterval(() => {
     // call the main process back to get the status of this robot, and see if anyone is using it
     r_gds.getBotConnectionStatuses()

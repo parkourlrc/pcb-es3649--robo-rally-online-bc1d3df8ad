@@ -64,7 +64,7 @@ openLobby()
 <template>
     <main class="gridded lobby-grid">
         <div>
-
+            <h2>Local Game (LAN)</h2>
             <p>Join IP: <span>{{ r_cs.ip }}</span></p>
             <div v-if="r_cs.ip">
                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" :view-box="r_gds.qr.view_box" stroke="none">
