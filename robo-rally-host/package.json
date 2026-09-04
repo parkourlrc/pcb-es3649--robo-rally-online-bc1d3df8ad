@@ -2,7 +2,7 @@
   "name": "robo-rally-host",
   "productName": "robo-rally-host",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Game host for RoboRally Online",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",

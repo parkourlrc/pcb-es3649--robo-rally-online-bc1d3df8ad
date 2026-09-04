@@ -160,8 +160,8 @@ export class BluetoothManager implements MovementExecutor {
         }
 
         // try to establish a connection
-        console.log(`[BluetoothManager]: Attempting bluetooth connection to ${bot.name}`)
-        
+        const retry_message = retries ? ` (retry #${retries} of ${BluetoothManager.CONNECTION_RETRIES})` : ''
+        console.log(`[BluetoothManager]: Attempting bluetooth connection to ${bot.name}${retry_message}`)
         if (!this.discovering) {
             console.log("[BluetoothManager]: can't connect while not discovering!")
             return false
@@ -203,7 +203,7 @@ export class BluetoothManager implements MovementExecutor {
             // set the initial state
             this.setMode(bot.id, BotState.SHUTDOWN)
         } catch (error) {
-            console.error(error)
+            console.error(`[BluetoothManager]: error connecting to ${bot.name}`, error)
             if (retries < BluetoothManager.CONNECTION_RETRIES) {
                 return this.connectRobot(bot, retries + 1)
             }
@@ -211,6 +211,8 @@ export class BluetoothManager implements MovementExecutor {
         } finally {
             this.attempting_connections.set(bot.id, false)
         }
+
+        console.log(`[BluetoothManager]: connected to ${bot.name}`)
 
         return true
     }
